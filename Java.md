@@ -308,3 +308,162 @@ public int method(String p1) { ... }
 예외적인 경우:
 1. 자명한 메서드 (예: 단순 getter)
 2. 오버라이딩 메서드 (상위 문서로 충분한 경우)
+
+## 8. Swagger API 문서화
+
+### 8.1 기본 설정
+
+Spring Boot 프로젝트에서 Swagger를 사용하기 위한 기본 설정:
+
+```java
+@Configuration
+public class SwaggerConfig {
+    @Bean
+    public OpenAPI openAPI() {
+        return new OpenAPI()
+            .info(new Info()
+                .title("API 문서")
+                .description("REST API 설명서")
+                .version("1.0.0")
+                .contact(new Contact()
+                    .name("개발팀")
+                    .email("dev@example.com")));
+    }
+}
+```
+
+### 8.2 Controller 문서화
+
+```java
+@Tag(name = "사용자 관리", description = "사용자 CRUD API")
+@RestController
+@RequestMapping("/api/users")
+public class UserController {
+
+    @Operation(summary = "사용자 정보 조회", description = "사용자 ID로 정보를 조회합니다.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "조회 성공"),
+        @ApiResponse(responseCode = "404", description = "사용자 없음")
+    })
+    @GetMapping("/{id}")
+    public ResponseEntity<UserResponse> getUser(
+        @Parameter(description = "사용자 ID") @PathVariable Long id
+    ) {
+        // 메서드 구현
+    }
+
+    @Operation(summary = "사용자 등록")
+    @PostMapping
+    public ResponseEntity<UserResponse> createUser(
+        @RequestBody @Valid UserCreateRequest request
+    ) {
+        // 메서드 구현
+    }
+}
+```
+
+### 8.3 Model 문서화
+
+```java
+@Schema(description = "사용자 생성 요청")
+public record UserCreateRequest(
+    @Schema(description = "사용자 이름", example = "홍길동")
+    @NotBlank
+    String name,
+
+    @Schema(description = "이메일", example = "hong@example.com")
+    @Email
+    String email,
+
+    @Schema(description = "나이", example = "20")
+    @Min(0) @Max(150)
+    int age
+) {}
+```
+
+### 8.4 주요 애노테이션
+
+#### 8.4.1 문서 구조화
+- `@Tag`: API 그룹 정의
+- `@Operation`: API 엔드포인트 설명
+- `@Parameter`: API 파라미터 설명
+- `@Schema`: 모델 클래스/필드 설명
+
+#### 8.4.2 응답 정의
+```java
+@Operation(summary = "데이터 조회")
+@ApiResponses(value = {
+    @ApiResponse(
+        responseCode = "200",
+        description = "조회 성공",
+        content = @Content(
+            mediaType = "application/json",
+            schema = @Schema(implementation = DataResponse.class)
+        )
+    ),
+    @ApiResponse(
+        responseCode = "400",
+        description = "잘못된 요청",
+        content = @Content(
+            mediaType = "application/json",
+            schema = @Schema(implementation = ErrorResponse.class)
+        )
+    )
+})
+```
+
+### 8.5 모범 사례
+
+1. 일관된 명명 규칙
+```java
+// 👍 좋음
+@Tag(name = "사용자 관리")
+@RequestMapping("/api/users")
+
+// ❌ 나쁨
+@Tag(name = "User Management")
+@RequestMapping("/api/user")
+```
+
+2. 상세한 설명 제공
+```java
+// 👍 좋음
+@Operation(
+    summary = "사용자 정보 수정",
+    description = "이름, 이메일, 나이 등 사용자 정보를 수정합니다. 수정되지 않은 필드는 기존 값을 유지합니다."
+)
+
+// ❌ 나쁨
+@Operation(summary = "사용자 수정")
+```
+
+3. 예제 값 포함
+```java
+// 👍 좋음
+@Schema(example = "hong@example.com")
+String email;
+
+// ❌ 나쁨
+@Schema(description = "이메일")
+String email;
+```
+
+### 8.6 보안 설정
+
+```java
+@Configuration
+public class SwaggerConfig {
+    @Bean
+    public OpenAPI openAPI() {
+        SecurityScheme securityScheme = new SecurityScheme()
+            .type(SecurityScheme.Type.HTTP)
+            .scheme("bearer")
+            .bearerFormat("JWT");
+
+        return new OpenAPI()
+            .info(new Info().title("API 문서"))
+            .addSecurityItem(new SecurityRequirement().addList("bearerAuth"))
+            .components(new Components().addSecuritySchemes("bearerAuth", securityScheme));
+    }
+}
+```

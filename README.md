@@ -16,6 +16,18 @@ Java 24를 기준으로 하는 코딩 스타일 가이드입니다. 다음과 �
 - Javadoc 작성 가이드
 - Swagger API 문서화 가이드
 
+### [JavaScript 스타일 가이드](Javascript.md)
+
+JavaScript를 위한 코딩 스타일 가이드입니다. 다음과 같은 내용을 포함합니다:
+
+- ESLint 설정
+- 들여쓰기 규칙
+- 명명 규칙
+- 최신 JavaScript 기능 활용
+- jQuery 사용 가이드
+- 비동기 처리 방법
+- 모듈 시스템 사용법
+
 ### [TypeScript 스타일 가이드](Typescript.md)
 
 TypeScript를 위한 코딩 스타일 가이드입니다. 다음과 같은 내용을 포함합니다:

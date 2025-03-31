@@ -1,5 +1,73 @@
 # React 스타일 가이드 (React 18 + TypeScript)
 
+## 핵심 원칙
+
+### Headless UI 지향
+
+프로젝트는 Headless UI 패턴을 지향합니다. 이는 다음과 같은 이점을 제공합니다:
+
+- **유연성**: UI 로직과 스타일링의 완벽한 분리
+- **재사용성**: 다양한 스타일링 시스템과 함께 사용 가능
+- **접근성**: 기본적인 접근성 기능 내장
+- **커스터마이징**: 필요에 따라 쉽게 스타일 변경 가능
+
+```tsx
+// 👍 좋음: Headless UI 패턴 사용
+import * as Select from '@radix-ui/react-select';
+
+const CustomSelect = ({ options, ...props }) => {
+  return (
+    <Select.Root {...props}>
+      <Select.Trigger className="flex items-center justify-between p-2 border rounded">
+        <Select.Value />
+        <Select.Icon />
+      </Select.Trigger>
+      <Select.Portal>
+        <Select.Content>
+          {options.map((option) => (
+            <Select.Item key={option.value} value={option.value}>
+              {option.label}
+            </Select.Item>
+          ))}
+        </Select.Content>
+      </Select.Portal>
+    </Select.Root>
+  );
+};
+```
+
+### CSS 최소화 원칙
+
+CSS 파일 생성을 최소화하고 Tailwind CSS를 주로 사용합니다:
+
+- **인라인 스타일링**: Tailwind CSS 클래스 사용
+- **CSS-in-JS 지양**: 별도의 스타일 파일 생성 최소화
+- **공통 스타일**: 재사용 가능한 Tailwind 컴포넌트 추출
+- **테마 설정**: Tailwind 설정 파일에서 일괄 관리
+
+```tsx
+// 👍 좋음: Tailwind CSS 사용
+const Card = ({ children, isActive }) => {
+  return (
+    <div className={cn(
+      "rounded-lg p-4 shadow-sm",
+      "transition-colors duration-200",
+      isActive ? "bg-primary-500 text-white" : "bg-white text-gray-900"
+    )}>
+      {children}
+    </div>
+  );
+};
+
+// ❌ 나쁨: 별도의 CSS 파일 생성
+// card.css
+.card {
+  border-radius: 0.5rem;
+  padding: 1rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+```
+
 ## ESLint 설정
 
 - 프로젝트에는 항상 ESLint와 TypeScript를 사용합니다.
